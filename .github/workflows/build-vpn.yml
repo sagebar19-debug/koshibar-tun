@@ -2,9 +2,9 @@ name: Build VPN App APK
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, principal ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, principal ]
 
 jobs:
   build:
@@ -22,9 +22,17 @@ jobs:
 
     - name: 🤖 Configurer le SDK Android
       uses: android-actions/setup-android@v3
+      with:
+        accept-android-sdk-licenses: true
 
     - name: 🔑 Rendre Gradle exécutable
-      run: chmod +x gradlew
+      run: |
+        if [ -f "gradlew" ]; then
+          chmod +x gradlew
+        else
+          gradle wrapper
+          chmod +x gradlew
+        fi
 
     - name: ⚙️ Compiler l'APK (Debug)
       run: ./gradlew assembleDebug
