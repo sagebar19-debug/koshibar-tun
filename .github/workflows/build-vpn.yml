@@ -1,38 +1,28 @@
-name: Build VPN App APK
+plugins {
+    id 'com.android.application'
+}
 
-on:
-  push:
-    branches: [ main, master, principal ]
-  pull_request:
-    branches: [ main, master, principal ]
+android {
+    namespace 'com.koshibar.tun'
+    compileSdk 34
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    defaultConfig {
+        applicationId "com.koshibar.tun"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
 
-    steps:
-    - name: Cloner le depot
-      uses: actions/checkout@v4
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
 
-    - name: Configurer Java (JDK 17)
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Installer Gradle
-      uses: gradle/actions/setup-gradle@v3
-      with:
-        gradle-version: '8.5'
-
-    - name: Accepter les licences SDK et Compiler
-      run: |
-        mkdir -p app/src/main/assets
-        # Lancer le build avec acceptation des licences si nécessaire
-        gradle clean assembleDebug --stacktrace
-
-    - name: Sauvegarder l'APK genere
-      uses: actions/upload-artifact@v4
-      with:
-        name: Koshibar-Tun-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+}
