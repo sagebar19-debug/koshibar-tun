@@ -20,10 +20,15 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: ⚙️ Générer le Wrapper Gradle si absent
+    - name: ⚙️ Télécharger et configurer Gradle Wrapper
       run: |
+        gradle -v || true
+        # Téléchargement d'un gradle wrapper standard si absent
         if [ ! -f "gradlew" ]; then
-          gradle wrapper
+          mvn_or_gradle_version="8.5"
+          wget https://services.gradle.org/distributions/gradle-${mvn_or_gradle_version}-bin.zip
+          unzip -q gradle-${mvn_or_gradle_version}-bin.zip
+          gradle-${mvn_or_gradle_version}/bin/gradle wrapper --gradle-version ${mvn_or_gradle_version}
         fi
         chmod +x gradlew
 
