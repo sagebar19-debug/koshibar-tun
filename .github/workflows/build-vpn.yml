@@ -20,19 +20,8 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: 🤖 Configurer le SDK Android
-      uses: android-actions/setup-android@v3
-      with:
-        accept-android-sdk-licenses: true
-
     - name: 🔑 Rendre Gradle exécutable
-      run: |
-        if [ -f "gradlew" ]; then
-          chmod +x gradlew
-        else
-          gradle wrapper
-          chmod +x gradlew
-        fi
+      run: chmod +x gradlew || true
 
     - name: ⚙️ Compiler l'APK (Debug)
       run: ./gradlew assembleDebug
