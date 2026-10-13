@@ -1,0 +1,2 @@
+rootProject.name = "KOSHIBAR_TUN"
+include ':app'
