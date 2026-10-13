@@ -20,15 +20,9 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: ⚙️ Configurer Gradle Wrapper
+    - name: 🔨 Compiler l'APK directement
       run: |
-        if [ ! -f "gradlew" ]; then
-          gradle wrapper --gradle-version 8.5
-        fi
-        chmod +x gradlew
-
-    - name: 🔨 Compiler l'APK (Debug avec logs détaillés)
-      run: ./gradlew assembleDebug --stacktrace --info
+        gradle assembleDebug
 
     - name: 📦 Sauvegarder l'APK généré
       uses: actions/upload-artifact@v4
