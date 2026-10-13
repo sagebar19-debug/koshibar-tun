@@ -20,9 +20,13 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: 🔨 Compiler l'APK directement
-      run: |
-        gradle assembleDebug
+    - name: ⚙️ Installer la bonne version de Gradle (8.5)
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.5'
+
+    - name: 🔨 Compiler l'APK
+      run: gradle assembleDebug
 
     - name: 📦 Sauvegarder l'APK généré
       uses: actions/upload-artifact@v4
