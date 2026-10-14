@@ -1,3 +1,127 @@
+name: Build VPN App APK
+
+on:
+  push:
+    branches: [ main, master, principal ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Cloner le depot
+      uses: actions/checkout@v4
+
+    - name: Configurer Java (JDK 17)
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Installer Gradle 8.5
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.5'
+
+    - name: Generer la structure Android et compiler l'APK
+      run: |
+        mkdir -p app/src/main/java/com/koshibar/tun
+        mkdir -p app/src/main/res/layout
+        mkdir -p app/src/main/res/values
+        mkdir -p app/src/main/assets
+
+        cat << 'EOF' > build.gradle
+        buildscript {
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                classpath 'com.android.tools.build:gradle:8.2.0'
+            }
+        }
+        allprojects {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        EOF
+
+        cat << 'EOF' > settings.gradle
+        rootProject.name = "KoshibarTun"
+        include ':app'
+        EOF
+
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+        }
+        android {
+            namespace 'com.koshibar.tun'
+            compileSdk 34
+            defaultConfig {
+                applicationId "com.koshibar.tun"
+                minSdk 21
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+        }
+        EOF
+
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+            package="com.koshibar.tun">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <application
+                android:allowBackup="true"
+                android:label="Koshibar Tun"
+                android:usesCleartextTraffic="true">
+                <activity
+                    android:name=".MainActivity"
+                    android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+
+        cat << 'EOF' > app/src/main/java/com/koshibar/tun/MainActivity.java
+        package com.koshibar.tun;
+
+        import android.app.Activity;
+        import android.os.Bundle;
+        import android.webkit.WebView;
+        import android.webkit.WebViewClient;
+
+        public class MainActivity extends Activity {
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                WebView webView = new WebView(this);
+                webView.getSettings().setJavaScriptEnabled(true);
+                webView.setWebViewClient(new WebViewClient());
+                webView.loadUrl("file:///android_asset/KOSHIBAR_TUN.html");
+                setContentView(webView);
+            }
+        }
+        EOF
+
+        # Copie directe de ton vrai fichier HTML dans les assets Android
         if [ -f "KOSHIBAR_TUN.html" ]; then
           cp KOSHIBAR_TUN.html app/src/main/assets/KOSHIBAR_TUN.html
+        else
+          echo "<html><body><h1>Fichier KOSHIBAR_TUN.html introuvable</h1></body></html>" > app/src/main/assets/KOSHIBAR_TUN.html
         fi
+
+        gradle assembleDebug --no-daemon
+
+    - name: Sauvegarder l'APK genere
+      uses: actions/upload-artifact@v4
+      with:
+        name: Koshibar-Tun-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
