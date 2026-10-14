@@ -18,15 +18,124 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Installer Gradle
+    - name: Configurer le SDK Android
+      uses: android-actions/setup-android@v3
+
+    - name: Installer Gradle 8.5
       uses: gradle/actions/setup-gradle@v3
       with:
         gradle-version: '8.5'
 
-    - name: Compiler l'APK
+    - name: Generer la structure Android et compiler l'APK
       run: |
-        chmod +x build.sh || true
-        gradle assembleDebug --stacktrace
+        # Création de l'arborescence du projet Android
+        mkdir -p app/src/main/java/com/koshibar/tun
+        mkdir -p app/src/main/res/layout
+        mkdir -p app/src/main/res/values
+        mkdir -p app/src/main/assets
+
+        # 1. build.gradle racine
+        cat << 'EOF' > build.gradle
+        buildscript {
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                classpath 'com.android.tools.build:gradle:8.2.0'
+            }
+        }
+        allprojects {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        EOF
+
+        # 2. settings.gradle
+        cat << 'EOF' > settings.gradle
+        rootProject.name = "KoshibarTun"
+        include ':app'
+        EOF
+
+        # 3. app/build.gradle
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+        }
+        android {
+            namespace 'com.koshibar.tun'
+            compileSdk 34
+            defaultConfig {
+                applicationId "com.koshibar.tun"
+                minSdk 21
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+        }
+        dependencies {
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+        }
+        EOF
+
+        # 4. AndroidManifest.xml
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+            package="com.koshibar.tun">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <application
+                android:allowBackup="true"
+                android:icon="@mipmap/ic_launcher"
+                android:label="Koshibar Tun"
+                android:usesCleartextTraffic="true"
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                <activity
+                    android:name=".MainActivity"
+                    android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+
+        # 5. MainActivity.java (charge le contenu WebView)
+        cat << 'EOF' > app/src/main/java/com/koshibar/tun/MainActivity.java
+        package com.koshibar.tun;
+
+        import android.os.Bundle;
+        import android.webkit.WebView;
+        import android.webkit.WebViewClient;
+        import androidx.appcompat.app.AppCompatActivity;
+
+        public class MainActivity extends AppCompatActivity {
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                WebView webView = new WebView(this);
+                webView.getSettings().setJavaScriptEnabled(true);
+                webView.setWebViewClient(new WebViewClient());
+                // Charge ton fichier HTML s'il existe dans les assets, sinon une page par defaut
+                webView.loadUrl("file:///android_asset/KOSHIBAR_TUN.html");
+                setContentView(webView);
+            }
+        }
+        EOF
+
+        # Vérification et copie du HTML s'il est présent à la racine, sinon création d'un fichier de secours
+        if [ -f "KOSHIBAR_TUN.html" ]; then
+          cp KOSHIBAR_TUN.html app/src/main/assets/
+        else
+          echo "<html><body><h1>Koshibar Tun</h1></body></html>" > app/src/main/assets/KOSHIBAR_TUN.html
+        fi
+
+        # Lancement de la compilation
+        gradle assembleDebug --no-daemon
 
     - name: Sauvegarder l'APK genere
       uses: actions/upload-artifact@v4
