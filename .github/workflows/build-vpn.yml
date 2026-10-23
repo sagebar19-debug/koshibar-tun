@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -8,13 +7,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="KOSHIBAR TUN"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <activity
-            android:name="com.koshibar.tun.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
 
             <intent-filter>
@@ -25,7 +23,7 @@
         </activity>
 
         <service
-            android:name="com.koshibar.tun.KoshibarVpnService"
+            android:name=".KoshibarVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:exported="false">
 
@@ -36,5 +34,4 @@
         </service>
 
     </application>
-
 </manifest>
