@@ -1,88 +1,35 @@
 
-name: KOSHIBAR TUN - Build APK
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - principal
-      - main
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-permissions:
-  contents: read
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="KOSHIBAR TUN"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.NoActionBar">
 
-jobs:
-  android:
-    name: Compiler KOSHIBAR TUN
-    runs-on: ubuntu-latest
+        <activity
+            android:name="com.koshibar.tun.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-    steps:
-      - name: Recuperer les fichiers
-        uses: actions/checkout@v4
+        <service
+            android:name="com.koshibar.tun.KoshibarVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
 
-      - name: Installer Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Installer Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
-      - name: Trouver le projet Android
-        id: project
-        shell: bash
-        run: |
-          if [ -f settings.gradle ]; then
-            echo "dir=." >> "$GITHUB_OUTPUT"
-          elif [ -f application/settings.gradle ]; then
-            echo "dir=application" >> "$GITHUB_OUTPUT"
-          else
-            echo "ERREUR: settings.gradle introuvable"
-            exit 1
-          fi
-
-      - name: Diagnostiquer AndroidManifest XML
-        working-directory: ${{ steps.project.outputs.dir }}
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import os
-          import xml.etree.ElementTree as ET
-
-          path = "app/src/main/AndroidManifest.xml"
-
-          if not os.path.isfile(path):
-              raise SystemExit("ERREUR : fichier introuvable : " + path)
-
-          with open(path, "rb") as f:
-              data = f.read()
-
-          print("Fichier :", path)
-          print("Taille :", len(data), "octets")
-          print("Debut :", repr(data[:120]))
-
-          try:
-              ET.fromstring(data)
-              print("SUCCES : XML bien forme")
-          except ET.ParseError as e:
-              print("ERREUR XML :", str(e))
-              print("CONTENU DU FICHIER :")
-              print(data.decode("utf-8", errors="replace"))
-              raise
-          PY
-
-      - name: Compiler APK Debug
-        working-directory: ${{ steps.project.outputs.dir }}
-        run: gradle --no-daemon assembleDebug --stacktrace --info
-
-      - name: Recuperer APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: KOSHIBAR-TUN-ANDROID
-          path: |
-            app/build/outputs/apk/debug/*.apk
-            application/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+    </application>
+</manifest>
