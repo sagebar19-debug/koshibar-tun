@@ -26,19 +26,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      
       - name: Installer Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-
-      - name: Verifier Android SDK
-        shell: bash
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls -la "$ANDROID_HOME/platforms" || true
-          ls -la "$ANDROID_HOME/build-tools" || true
 
       - name: Trouver le projet Android
         id: project
@@ -53,9 +44,39 @@ jobs:
             exit 1
           fi
 
+      - name: Diagnostiquer AndroidManifest XML
+        working-directory: ${{ steps.project.outputs.dir }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+
+          path = "app/src/main/AndroidManifest.xml"
+
+          if not os.path.isfile(path):
+              raise SystemExit("ERREUR : fichier introuvable : " + path)
+
+          with open(path, "rb") as f:
+              data = f.read()
+
+          print("Fichier :", path)
+          print("Taille :", len(data), "octets")
+          print("Debut :", repr(data[:120]))
+
+          try:
+              ET.fromstring(data)
+              print("SUCCES : XML bien forme")
+          except ET.ParseError as e:
+              print("ERREUR XML :", str(e))
+              print("CONTENU DU FICHIER :")
+              print(data.decode("utf-8", errors="replace"))
+              raise
+          PY
+
       - name: Compiler APK Debug
         working-directory: ${{ steps.project.outputs.dir }}
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon assembleDebug --stacktrace --info
 
       - name: Recuperer APK
         uses: actions/upload-artifact@v4
