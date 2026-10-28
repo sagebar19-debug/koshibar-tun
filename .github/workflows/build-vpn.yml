@@ -1,4 +1,4 @@
-herename: Build KOSHIBAR TUN APK
+name: Build KOSHIBAR TUN APK
 
 on:
   push:
