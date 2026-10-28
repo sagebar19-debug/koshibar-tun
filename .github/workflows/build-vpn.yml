@@ -1,4 +1,4 @@
-name: Build KOSHIBAR TUN APK
+herename: Build KOSHIBAR TUN APK
 
 on:
   push:
@@ -32,8 +32,6 @@ jobs:
 
       - name: Installer Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: "11076708_"
 
       - name: Installer les composants Android
         run: |
