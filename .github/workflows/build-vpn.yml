@@ -30,13 +30,11 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Installer Android SDK
+      - name: Installer Android SDK et composants
         uses: android-actions/setup-android@v3
-
-      - name: Installer les composants Android
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        with:
+          platforms: android-35
+          build-tools: 35.0.0
 
       - name: Compiler KOSHIBAR TUN
         run: gradle --no-daemon assembleDebug --stacktrace
