@@ -1,4 +1,4 @@
-Name: Build KOSHIBAR TUN APK
+name: Build KOSHIBAR TUN APK
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Installer les composants SDK 35
         run: |
-          echo "y" | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-35" "build-tools;35.0.0" "cmdline-tools;latest"
+          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-35" "build-tools;35.0.0"
 
       - name: Compiler KOSHIBAR TUN
         run: gradle --no-daemon assembleDebug --stacktrace
