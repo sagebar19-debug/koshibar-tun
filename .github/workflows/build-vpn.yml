@@ -34,10 +34,13 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           accept-android-sdk-licenses: true
-          packages: 'platforms;android-35 build-tools;35.0.0'
+          packages: 'platforms;android-35 build-tools;35.0.0 cmdline-tools;latest'
+
+      - name: Rendre Gradle executable
+        run: chmod +x gradlew
 
       - name: Compiler KOSHIBAR TUN
-        run: gradle --no-daemon assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Publier le fichier APK
         uses: actions/upload-artifact@v4
