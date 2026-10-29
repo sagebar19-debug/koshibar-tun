@@ -34,10 +34,7 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           accept-android-sdk-licenses: true
-
-      - name: Installer les composants SDK 35
-        run: |
-          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-35" "build-tools;35.0.0"
+          packages: 'platforms;android-35 build-tools;35.0.0'
 
       - name: Compiler KOSHIBAR TUN
         run: gradle --no-daemon assembleDebug --stacktrace
