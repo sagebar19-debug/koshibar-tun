@@ -29,6 +29,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+          # Indique à l'action Gradle où trouver les fichiers de build
+          build-root-directory: './koshibar-tun'
 
       - name: Installer Android SDK et accepter les licences
         uses: android-actions/setup-android@v3
@@ -37,11 +39,12 @@ jobs:
           packages: 'platforms;android-35 build-tools;35.0.0 cmdline-tools;latest'
 
       - name: Compiler KOSHIBAR TUN
-        run: gradle --no-daemon assembleDebug --info --stacktrace
+        run: gradle --no-daemon assembleDebug --stacktrace
+        working-directory: ./koshibar-tun
 
       - name: Publier le fichier APK
         uses: actions/upload-artifact@v4
         with:
           name: KOSHIBAR-TUN-APK
-          path: '**/build/outputs/apk/debug/app-debug.apk'
+          path: './koshibar-tun/app/build/outputs/apk/debug/app-debug.apk'
           if-no-files-found: error
