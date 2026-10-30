@@ -37,8 +37,7 @@ jobs:
           packages: 'platforms;android-35 build-tools;35.0.0 cmdline-tools;latest'
 
       - name: Compiler KOSHIBAR TUN
-        run: gradle --no-daemon assembleDebug --stacktrace
-        working-directory: .
+        run: gradle --no-daemon assembleDebug --info --stacktrace
 
       - name: Publier le fichier APK
         uses: actions/upload-artifact@v4
